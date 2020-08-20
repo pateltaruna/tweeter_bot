@@ -38,7 +38,7 @@ def reply_to_tweets():
     last_seen_id = retrieve_lastseen_id("last_seen_id.txt")
     # the below line provides all the tweets with id greater than lastseen id
 
-    
+
     try:
       mentions = api.mentions_timeline( last_seen_id,tweet_mode='extended')  # NOTE: We need to use tweet_mode='extended' below to show all full tweets (with full_text). Without it, long tweets would be cut off.
     except RateLimitError :
@@ -54,8 +54,10 @@ def reply_to_tweets():
         store_lastseen_id("last_seen_id.txt",last_seen_id)
         if "hiii " in tweets.full_text.lower():
             print('found & replying to '+'  '+str(tweets.id) + '_' + tweets.full_text )
-            api.update_status('@' + tweets.user.screen_name +'#Its a reply back to you!', tweets.id)
-
+            try:
+              api.update_status('@' + tweets.user.screen_name +'#Its a reply back to you!', tweets.id)
+            except TweepError as err:
+              print(err)
 
 while True:
     reply_to_tweets()
