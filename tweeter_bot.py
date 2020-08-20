@@ -45,8 +45,7 @@ def reply_to_tweets():
       print("Is raised when an API method fails due to hitting Twitter’s rate limit. Makes for easy handling of the rate limit specifically.")
     except TweepError as err:
       print(err)
-    finally:
-      print("no error")
+      mentions = []
 
     for tweets in reversed(mentions):
         last_seen_id = tweets.id
