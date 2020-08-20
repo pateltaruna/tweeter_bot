@@ -1,4 +1,5 @@
 import tweepy
+from tweepy import TweepError, RateLimitError
 import time #for sleep time
 import credentials #for developer's tweeter credentials
 
@@ -36,16 +37,27 @@ def reply_to_tweets():
     # mentions = api.mentions_timeline()
     last_seen_id = retrieve_lastseen_id("last_seen_id.txt")
     # the below line provides all the tweets with id greater than lastseen id
-    mentions = api.mentions_timeline( last_seen_id,tweet_mode='extended')  # NOTE: We need to use tweet_mode='extended' below to show all full tweets (with full_text). Without it, long tweets would be cut off.
+
+
+    try:
+      mentions = api.mentions_timeline( last_seen_id,tweet_mode='extended')  # NOTE: We need to use tweet_mode='extended' below to show all full tweets (with full_text). Without it, long tweets would be cut off.
+    except RateLimitError :
+      print("Is raised when an API method fails due to hitting Twitter’s rate limit. Makes for easy handling of the rate limit specifically.")
+    except TweepError as err:
+      print(err)
+      mentions = []
+
     for tweets in reversed(mentions):
         last_seen_id = tweets.id
         print(str(tweets.id) + '_' + tweets.full_text )
         store_lastseen_id("last_seen_id.txt",last_seen_id)
         if "hiii " in tweets.full_text.lower():
             print('found & replying to '+'  '+str(tweets.id) + '_' + tweets.full_text )
-            api.update_status('@' + tweets.user.screen_name +'#Its a reply back to you!', tweets.id)
-
+            try:
+              api.update_status('@' + tweets.user.screen_name +'#Its a reply back to you!', tweets.id)
+            except TweepError as err:
+              print(err)
 
 while True:
     reply_to_tweets()
-    time.sleep(1)
+    time.sleep(60)
